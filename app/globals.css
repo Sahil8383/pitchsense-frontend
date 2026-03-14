@@ -1,26 +1,100 @@
-@import "tailwindcss";
+@import 'tailwindcss';
 
+/* ElevenLabs-inspired design tokens (light) */
 :root {
+  /* Neutrals (N50–N950) */
   --background: #ffffff;
-  --foreground: #171717;
+  --foreground: #292929;
+  --muted: #767676;
+  --muted-foreground: #6e6e6e;
+  --border: #dcdcdc;
+  --card: #ffffff;
+  --card-foreground: #292929;
+  --input: #ffffff;
+  --ring: #464646;
+
+  /* Semantic (text 800, bg 200) */
+  --success: #065f41;
+  --success-bg: #a7f3cc;
+  --warning: #792c15;
+  --warning-bg: #fcd5ac;
+  --destructive: #96231e;
+  --destructive-bg: #fdcdcb;
+  --informative: #384094;
+  --informative-bg: #c8d5f4;
+
+  /* Radius (ElevenLabs) */
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-xl: 20px;
+  --radius-2xl: 28px;
+  --radius-full: 999px;
+
+  /* Content width for layout */
+  --content-max-w: 720px;
+  --content-max-w-wide: 960px;
 }
+
+/* Dark theme */
+.dark {
+  --background: #292929;
+  --foreground: #f2f2f2;
+  --muted: #949494;
+  --muted-foreground: #bdbdbd;
+  --border: #525252;
+  --card: #3d3d3d;
+  --card-foreground: #f2f2f2;
+  --input: #3d3d3d;
+  --ring: #949494;
+
+  /* Semantic foreground (lighter for contrast on dark bg) */
+  --success: #34d399;
+  --warning: #fbbf24;
+  --destructive: #f87171;
+  --informative: #93c5fd;
+  --success-bg: #064e37;
+  --warning-bg: #492104;
+  --destructive-bg: #440d0b;
+  --informative-bg: #252846;
+}
+
+@custom-variant dark (&:where(.dark, .dark *));
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-border: var(--border);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-success: var(--success);
+  --color-success-bg: var(--success-bg);
+  --color-warning: var(--warning);
+  --color-warning-bg: var(--warning-bg);
+  --color-destructive: var(--destructive);
+  --color-destructive-bg: var(--destructive-bg);
+  --color-informative: var(--informative);
+  --color-informative-bg: var(--informative-bg);
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  --radius-sm: var(--radius-sm);
+  --radius-md: var(--radius-md);
+  --radius-lg: var(--radius-lg);
+  --radius-xl: var(--radius-xl);
+  --radius-2xl: var(--radius-2xl);
+  --radius-full: var(--radius-full);
+
+  --font-sans: var(--font-sans-variable), ui-sans-serif, sans-serif;
+  --font-mono: var(--font-geist-mono);
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-feature-settings: normal;
+  letter-spacing: 0.01em;
+  line-height: 1.6;
 }
