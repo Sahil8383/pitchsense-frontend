@@ -8,7 +8,7 @@ import {
   type ReactNode,
 } from 'react';
 
-export type ToastType = 'success' | 'error' | 'info';
+export type ToastType = 'success' | 'error' | 'info' | 'loading';
 
 export interface ToastItem {
   id: string;
@@ -18,7 +18,7 @@ export interface ToastItem {
 
 interface ToastContextValue {
   toasts: ToastItem[];
-  addToast: (type: ToastType, message: string) => void;
+  addToast: (type: ToastType, message: string) => string;
   removeToast: (id: string) => void;
 }
 
@@ -30,9 +30,12 @@ export function ToastProvider({ children }: { children: ReactNode }) {
   const addToast = useCallback((type: ToastType, message: string) => {
     const id = Math.random().toString(36).slice(2);
     setToasts((prev) => [...prev, { id, type, message }]);
-    setTimeout(() => {
-      setToasts((prev) => prev.filter((t) => t.id !== id));
-    }, 5000);
+    if (type !== 'loading') {
+      setTimeout(() => {
+        setToasts((prev) => prev.filter((t) => t.id !== id));
+      }, 5000);
+    }
+    return id;
   }, []);
 
   const removeToast = useCallback((id: string) => {

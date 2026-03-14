@@ -11,12 +11,25 @@ import { SessionLeftSidebar } from '@/components/roleplay/SessionLeftSidebar';
 import { EndSessionModal } from '@/components/roleplay/EndSessionModal';
 import { Button } from '@/components/ui/Button';
 import { useSessionContext } from '@/contexts/SessionContext';
-import { useSendMessage } from '@/hooks/useSession';
 import { useEndSession } from '@/hooks/useSession';
 import { useToast } from '@/contexts/ToastContext';
+import { sendMessageStream } from '@/lib/api/sessions';
+import { normalizeAction } from '@/lib/chatUtils';
 import type { Message } from '@/lib/types';
 
 type Tab = 'chat' | 'analytics';
+
+/** Buyer actions that mean the call/conversation ended; we can react in the UI. */
+const END_CALL_ACTIONS = new Set([
+  'hangs up',
+  'hang up',
+  'hangs up the phone',
+  'ends the call',
+  'end the call',
+  'leaves',
+  'leaves the call',
+  'disconnects',
+]);
 
 const QUICK_PROMPTS = [
   "Hi, I'd like to introduce myself and our solution—do you have a few minutes?",
@@ -25,28 +38,72 @@ const QUICK_PROMPTS = [
   "Would it make sense to schedule a short demo so you can see it in action?",
 ];
 
+const STREAMING_BUYER_ID = 'streaming-buyer';
+
 export default function SessionPage() {
   const params = useParams();
   const sessionId =
     typeof params.sessionId === 'string' ? params.sessionId : null;
   const router = useRouter();
-  const { session: contextSession } = useSessionContext();
-  const sendMessage = useSendMessage(sessionId);
+  const { session: contextSession, setSession } = useSessionContext();
   const endSession = useEndSession();
-  const { addToast } = useToast();
+  const { addToast, removeToast } = useToast();
 
   const session =
     sessionId && contextSession?.id === sessionId ? contextSession : null;
 
   const [pendingMessages, setPendingMessages] = useState<Message[]>([]);
-  const displayMessages = useMemo(
-    () => [...(session?.messages ?? []), ...pendingMessages],
-    [session?.messages, pendingMessages],
-  );
+  const [isStreaming, setIsStreaming] = useState(false);
+  const [streamingContent, setStreamingContent] = useState('');
+  const displayMessages = useMemo(() => {
+    const base = session?.messages ?? [];
+    if (!streamingContent && !isStreaming) {
+      return [...base, ...pendingMessages];
+    }
+    const streamingBuyer: Message = {
+      id: STREAMING_BUYER_ID,
+      role: 'buyer',
+      content: streamingContent,
+      timestamp: new Date().toISOString(),
+    };
+    return [...base, ...pendingMessages, streamingBuyer];
+  }, [session?.messages, pendingMessages, isStreaming, streamingContent]);
 
   const [endModalOpen, setEndModalOpen] = useState(false);
   const [narrowTab, setNarrowTab] = useState<Tab>('chat');
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const isEndingDueToBuyerRef = useRef(false);
+
+  const handleBuyerAction = useCallback(
+    async (action: string) => {
+      const key = normalizeAction(action);
+      if (!END_CALL_ACTIONS.has(key) || !sessionId) return;
+      if (isEndingDueToBuyerRef.current) return;
+      isEndingDueToBuyerRef.current = true;
+      const toastId = addToast('loading', 'Buyer left, ending session…');
+      try {
+        await endSession.mutateAsync(sessionId);
+        removeToast(toastId);
+        router.push(`/evaluation/${sessionId}`);
+      } catch (err) {
+        removeToast(toastId);
+        const message = err instanceof Error ? err.message : '';
+        const alreadyEnded =
+          /already completed|already ended/i.test(message);
+        if (alreadyEnded) {
+          router.push(`/evaluation/${sessionId}`);
+        } else {
+          addToast(
+            'error',
+            message || 'Failed to end session. Please try again.',
+          );
+        }
+      } finally {
+        isEndingDueToBuyerRef.current = false;
+      }
+    },
+    [sessionId, addToast, removeToast, endSession, router],
+  );
 
   const scrollToBottom = useCallback(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -58,7 +115,7 @@ export default function SessionPage() {
 
   const handleSend = useCallback(
     async (content: string) => {
-      if (!sessionId) return;
+      if (!sessionId || !session) return;
       const sellerMessage: Message = {
         id: `temp-seller-${Date.now()}`,
         role: 'seller',
@@ -66,21 +123,40 @@ export default function SessionPage() {
         timestamp: new Date().toISOString(),
       };
       setPendingMessages((prev) => [...prev, sellerMessage]);
+      setIsStreaming(true);
+      setStreamingContent('');
       scrollToBottom();
 
-      try {
-        const { message: buyerMessage } =
-          await sendMessage.mutateAsync(content);
-        setPendingMessages((prev) => [...prev, buyerMessage]);
-        scrollToBottom();
-      } catch {
-        setPendingMessages((prev) =>
-          prev.filter((m) => m.id !== sellerMessage.id),
-        );
-        addToast('error', 'Failed to send message. Please try again.');
-      }
+      await sendMessageStream(
+        sessionId,
+        content,
+        {
+          onDelta: (delta) => {
+            setStreamingContent((prev) => prev + delta);
+            scrollToBottom();
+          },
+          onDone: (buyerMessage) => {
+            setIsStreaming(false);
+            setStreamingContent('');
+            setPendingMessages([]);
+            setSession({
+              ...session,
+              messages: [...session.messages, sellerMessage, buyerMessage],
+            });
+            scrollToBottom();
+          },
+          onError: (error) => {
+            setIsStreaming(false);
+            setStreamingContent('');
+            setPendingMessages((prev) =>
+              prev.filter((m) => m.id !== sellerMessage.id),
+            );
+            addToast('error', error || 'Failed to send message. Please try again.');
+          },
+        },
+      );
     },
-    [sessionId, sendMessage, addToast, scrollToBottom],
+    [sessionId, session, setSession, addToast, scrollToBottom],
   );
 
   const handleEndSession = useCallback(async () => {
@@ -210,9 +286,13 @@ export default function SessionPage() {
               {hasMessages ? (
                 <div className="space-y-4">
                   {displayMessages.map((m) => (
-                    <ChatMessage key={m.id} message={m} />
+                    <ChatMessage
+                      key={m.id}
+                      message={m}
+                      onBuyerAction={handleBuyerAction}
+                    />
                   ))}
-                  {sendMessage.isPending && <TypingIndicator />}
+                  {isStreaming && !streamingContent && <TypingIndicator />}
                   <div ref={messagesEndRef} />
                 </div>
               ) : (
@@ -230,7 +310,7 @@ export default function SessionPage() {
                         key={prompt}
                         type="button"
                         onClick={() => handleSend(prompt)}
-                        disabled={sendMessage.isPending}
+                        disabled={isStreaming}
                         className="rounded-full border border-border bg-muted/30 px-4 py-2 text-sm text-foreground transition-colors hover:bg-muted/50 focus:outline-none focus:ring-2 focus:ring-ring disabled:opacity-50"
                       >
                         {prompt}
@@ -244,7 +324,7 @@ export default function SessionPage() {
           </div>
           <ChatInput
             onSend={handleSend}
-            disabled={sendMessage.isPending}
+            disabled={isStreaming}
             placeholder="Type your message…"
           />
         </div>

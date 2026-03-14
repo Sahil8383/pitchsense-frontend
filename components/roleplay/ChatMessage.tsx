@@ -1,9 +1,13 @@
 'use client';
 
+import { useEffect, useRef } from 'react';
 import type { Message } from '@/lib/types';
+import { parseMessageContent, normalizeAction } from '@/lib/chatUtils';
 
 export interface ChatMessageProps {
   message: Message;
+  /** Called when the buyer message contains an action (e.g. *hangs up*). Use for UI side effects. */
+  onBuyerAction?: (action: string) => void;
 }
 
 function formatTime(iso: string) {
@@ -18,7 +22,51 @@ function formatTime(iso: string) {
   }
 }
 
-export function ChatMessage({ message }: ChatMessageProps) {
+function BuyerContent({
+  content,
+  onAction,
+}: {
+  content: string;
+  onAction?: (action: string) => void;
+}) {
+  const segments = parseMessageContent(content);
+  const reportedActions = useRef<Set<string>>(new Set());
+
+  useEffect(() => {
+    if (!onAction) return;
+    const parsed = parseMessageContent(content);
+    for (const seg of parsed) {
+      if (seg.type === 'action') {
+        const key = normalizeAction(seg.content);
+        if (!reportedActions.current.has(key)) {
+          reportedActions.current.add(key);
+          onAction(seg.content);
+        }
+      }
+    }
+  }, [content, onAction]);
+
+  return (
+    <p className="whitespace-pre-wrap text-sm leading-relaxed">
+      {segments.map((seg, i) =>
+        seg.type === 'text' ? (
+          <span key={i}>{seg.content}</span>
+        ) : (
+          <span
+            key={i}
+            className="italic text-muted-foreground"
+            data-action={seg.content}
+            title={`Action: ${seg.content}`}
+          >
+            *{seg.content}*
+          </span>
+        ),
+      )}
+    </p>
+  );
+}
+
+export function ChatMessage({ message, onBuyerAction }: ChatMessageProps) {
   const isSeller = message.role === 'seller';
 
   return (
@@ -41,9 +89,13 @@ export function ChatMessage({ message }: ChatMessageProps) {
             {formatTime(message.timestamp)}
           </span>
         </div>
-        <p className="whitespace-pre-wrap text-sm leading-relaxed">
-          {message.content}
-        </p>
+        {isSeller ? (
+          <p className="whitespace-pre-wrap text-sm leading-relaxed">
+            {message.content}
+          </p>
+        ) : (
+          <BuyerContent content={message.content} onAction={onBuyerAction} />
+        )}
       </div>
     </div>
   );

@@ -54,7 +54,7 @@ export function SessionLeftSidebar({
 
         <nav className="flex flex-col gap-0.5" aria-label="App navigation">
           <p className="mb-1.5 text-xs font-medium uppercase tracking-wider text-muted-foreground">
-            Navigation
+            Chat
           </p>
           <Link
             href="/scenario/new"
