@@ -6,7 +6,6 @@ import { Badge } from '@/components/ui/Badge';
 
 export interface AnalyticsPanelProps {
   sessionId: string | null;
-  /** When true, renders without card border/background for use inside a sidebar */
   embedded?: boolean;
 }
 
@@ -32,7 +31,13 @@ export function AnalyticsPanel({ sessionId, embedded }: AnalyticsPanelProps) {
 
   return (
     <Wrapper className={wrapperClass}>
-      <HeaderTag className={embedded ? 'mb-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground' : undefined}>
+      <HeaderTag
+        className={
+          embedded
+            ? 'mb-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground'
+            : undefined
+        }
+      >
         Live analytics
       </HeaderTag>
 
@@ -99,12 +104,12 @@ export function AnalyticsPanel({ sessionId, embedded }: AnalyticsPanelProps) {
                       'linear-gradient(to right, #ef4444 0%, #f97316 50%, #22c55e 100%)',
                   }}
                 />
-                {/* Pointer that moves with percentage */}
+                {/* Profile-like circle indicator */}
                 <div
-                  className="absolute top-0 bottom-0 w-1 rounded-full bg-slate-900 shadow-sm transition-all duration-300 ease-out"
+                  className="absolute top-1/2 size-5 rounded-full border-2 border-white bg-slate-800 shadow-md transition-all duration-300 ease-out dark:border-slate-900 dark:bg-slate-100"
                   style={{
                     left: `clamp(0%, ${a.buyerInterestPercent}%, 100%)`,
-                    transform: 'translateX(-50%)',
+                    transform: 'translate(-50%, -50%)',
                   }}
                   aria-hidden
                 />

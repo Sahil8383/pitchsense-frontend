@@ -35,7 +35,7 @@ const QUICK_PROMPTS = [
   "Hi, I'd like to introduce myself and our solution—do you have a few minutes?",
   "What's the biggest challenge you're facing with your current setup?",
   "I hear you on that—here's how we've helped other teams in your situation.",
-  "Would it make sense to schedule a short demo so you can see it in action?",
+  'Would it make sense to schedule a short demo so you can see it in action?',
 ];
 
 const STREAMING_BUYER_ID = 'streaming-buyer';
@@ -88,8 +88,7 @@ export default function SessionPage() {
       } catch (err) {
         removeToast(toastId);
         const message = err instanceof Error ? err.message : '';
-        const alreadyEnded =
-          /already completed|already ended/i.test(message);
+        const alreadyEnded = /already completed|already ended/i.test(message);
         if (alreadyEnded) {
           router.push(`/evaluation/${sessionId}`);
         } else {
@@ -127,34 +126,33 @@ export default function SessionPage() {
       setStreamingContent('');
       scrollToBottom();
 
-      await sendMessageStream(
-        sessionId,
-        content,
-        {
-          onDelta: (delta) => {
-            setStreamingContent((prev) => prev + delta);
-            scrollToBottom();
-          },
-          onDone: (buyerMessage) => {
-            setIsStreaming(false);
-            setStreamingContent('');
-            setPendingMessages([]);
-            setSession({
-              ...session,
-              messages: [...session.messages, sellerMessage, buyerMessage],
-            });
-            scrollToBottom();
-          },
-          onError: (error) => {
-            setIsStreaming(false);
-            setStreamingContent('');
-            setPendingMessages((prev) =>
-              prev.filter((m) => m.id !== sellerMessage.id),
-            );
-            addToast('error', error || 'Failed to send message. Please try again.');
-          },
+      await sendMessageStream(sessionId, content, {
+        onDelta: (delta) => {
+          setStreamingContent((prev) => prev + delta);
+          scrollToBottom();
         },
-      );
+        onDone: (buyerMessage) => {
+          setIsStreaming(false);
+          setStreamingContent('');
+          setPendingMessages([]);
+          setSession({
+            ...session,
+            messages: [...session.messages, sellerMessage, buyerMessage],
+          });
+          scrollToBottom();
+        },
+        onError: (error) => {
+          setIsStreaming(false);
+          setStreamingContent('');
+          setPendingMessages((prev) =>
+            prev.filter((m) => m.id !== sellerMessage.id),
+          );
+          addToast(
+            'error',
+            error || 'Failed to send message. Please try again.',
+          );
+        },
+      });
     },
     [sessionId, session, setSession, addToast, scrollToBottom],
   );
@@ -203,9 +201,9 @@ export default function SessionPage() {
   const hasMessages = displayMessages.length > 0;
 
   return (
-    <div className="flex min-h-screen bg-background">
-      {/* Left sidebar — nav + session context + end session (full height) */}
-      <div className="hidden lg:flex lg:self-stretch">
+    <div className="flex h-screen min-h-0 bg-background overflow-hidden">
+      {/* Left sidebar — nav + session context + end session (stays in view) */}
+      <div className="hidden lg:flex lg:h-full lg:min-h-0 lg:overflow-y-auto">
         <SessionLeftSidebar
           personaName={persona?.name ?? 'Buyer'}
           personaCompany={persona?.company}
@@ -215,8 +213,8 @@ export default function SessionPage() {
         />
       </div>
 
-      {/* Center — chat */}
-      <div className="flex min-w-0 flex-1 flex-col border-r border-border">
+      {/* Center — chat (only this area scrolls) */}
+      <div className="flex min-h-0 min-w-0 flex-1 flex-col border-r border-border overflow-hidden">
         {/* Minimal top bar on desktop; on narrow show header with end session */}
         <header className="flex shrink-0 items-center justify-between border-b border-border bg-background px-4 py-3 lg:px-6">
           <span className="text-sm font-medium text-muted-foreground">
@@ -341,9 +339,9 @@ export default function SessionPage() {
         </div>
       </div>
 
-      {/* Right sidebar — analytics (desktop) */}
-      <aside className="hidden w-80 shrink-0 border-l border-border bg-background lg:block lg:overflow-y-auto">
-        <div className="sticky top-0 p-4">
+      {/* Right sidebar — analytics (desktop, stays in view) */}
+      <aside className="hidden w-80 shrink-0 border-l border-border bg-background lg:block lg:h-full lg:min-h-0 lg:overflow-y-auto">
+        <div className="p-4">
           <div className="mb-3 flex items-center justify-between">
             <h2 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
               Analytics
