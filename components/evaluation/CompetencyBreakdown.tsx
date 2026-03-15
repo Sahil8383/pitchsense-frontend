@@ -60,6 +60,14 @@ export function CompetencyBreakdown({
                   `${Number(value) ?? 0} / ${MAX_SCORE}`,
                   'Score',
                 ]}
+                contentStyle={{
+                  backgroundColor: 'var(--card)',
+                  color: 'var(--card-foreground)',
+                  border: '1px solid var(--border)',
+                  borderRadius: '6px',
+                }}
+                labelStyle={{ color: 'var(--card-foreground)' }}
+                itemStyle={{ color: 'var(--card-foreground)' }}
               />
               <Bar dataKey="score" radius={[0, 4, 4, 0]}>
                 {chartData.map((_, i) => (
