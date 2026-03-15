@@ -2,18 +2,13 @@
 
 import { useState, useEffect } from 'react';
 import { useWebSocket } from '@/hooks/useWebSocket';
+import { fillerCountToSeverityClass } from '@/lib/utils';
 import { Card, CardHeader } from '@/components/ui/Card';
 import { Badge } from '@/components/ui/Badge';
 
 export interface AnalyticsPanelProps {
   sessionId: string | null;
   embedded?: boolean;
-}
-
-function FillerColorClass(total: number) {
-  if (total <= 3) return 'text-success';
-  if (total <= 8) return 'text-warning';
-  return 'text-destructive';
 }
 
 export function AnalyticsPanel({ sessionId, embedded }: AnalyticsPanelProps) {
@@ -71,7 +66,7 @@ export function AnalyticsPanel({ sessionId, embedded }: AnalyticsPanelProps) {
               Filler words
             </p>
             <p
-              className={`text-lg font-semibold ${FillerColorClass(a.fillerWordTotal)}`}
+              className={`text-lg font-semibold ${fillerCountToSeverityClass(a.fillerWordTotal)}`}
             >
               Last: {a.fillerWordCount} · Total: {a.fillerWordTotal}
             </p>

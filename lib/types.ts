@@ -36,6 +36,11 @@ export interface Message {
   wordCount?: number;
 }
 
+/** Message display: parsed segment for text vs action (e.g. *hangs up*). */
+export type MessageSegment =
+  | { type: 'text'; content: string }
+  | { type: 'action'; content: string };
+
 export interface Session {
   id: string;
   scenarioId: string;

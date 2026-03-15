@@ -1,18 +1,16 @@
 'use client';
 
-import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import { ScoreOverview } from '@/components/evaluation/ScoreOverview';
 import { CompetencyBreakdown } from '@/components/evaluation/CompetencyBreakdown';
 import { TranscriptViewer } from '@/components/evaluation/TranscriptViewer';
 import { Spinner } from '@/components/ui/Spinner';
 import { useEvaluation } from '@/hooks/useEvaluation';
+import { useSessionIdParam } from '@/hooks/useSessionIdParam';
 import { useSessionContext } from '@/contexts/SessionContext';
 
 export default function EvaluationPage() {
-  const params = useParams();
-  const sessionId =
-    typeof params.sessionId === 'string' ? params.sessionId : null;
+  const sessionId = useSessionIdParam();
   const {
     data: evaluation,
     isLoading,

@@ -3,23 +3,12 @@
 import { useEffect, useRef } from 'react';
 import type { Message } from '@/lib/types';
 import { parseMessageContent, normalizeAction } from '@/lib/chatUtils';
+import { formatTime } from '@/lib/utils';
 
 export interface ChatMessageProps {
   message: Message;
   /** Called when the buyer message contains an action (e.g. *hangs up*). Use for UI side effects. */
   onBuyerAction?: (action: string) => void;
-}
-
-function formatTime(iso: string) {
-  try {
-    const d = new Date(iso);
-    return d.toLocaleTimeString(undefined, {
-      hour: '2-digit',
-      minute: '2-digit',
-    });
-  } catch {
-    return '';
-  }
 }
 
 function BuyerContent({

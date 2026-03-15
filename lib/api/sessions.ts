@@ -1,37 +1,17 @@
-import type {
-  Session,
-  Evaluation,
-  SendMessageResponse,
-  Message,
-} from '@/lib/types';
-import { getApiBase } from './config';
-
-const base = () => getApiBase();
+import type { Session, Evaluation, Message } from '@/lib/types';
+import { getApiBase, getApiError } from './config';
 
 export async function createSession(scenarioId: string): Promise<Session> {
-  const res = await fetch(`${base()}/api/scenarios/${scenarioId}/sessions`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-  });
+  const res = await fetch(
+    `${getApiBase()}/api/scenarios/${scenarioId}/sessions`,
+    {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+    },
+  );
   if (!res.ok) {
-    const err = await res.json().catch(() => ({ message: res.statusText }));
-    throw new Error(err.message ?? 'Failed to create session');
-  }
-  return res.json();
-}
-
-export async function sendMessage(
-  sessionId: string,
-  content: string,
-): Promise<SendMessageResponse> {
-  const res = await fetch(`${base()}/api/sessions/${sessionId}/messages`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ content }),
-  });
-  if (!res.ok) {
-    const err = await res.json().catch(() => ({ message: res.statusText }));
-    throw new Error(err.message ?? 'Failed to send message');
+    const message = await getApiError(res);
+    throw new Error(message || 'Failed to create session');
   }
   return res.json();
 }
@@ -55,7 +35,7 @@ export async function sendMessageStream(
   },
 ): Promise<void> {
   const res = await fetch(
-    `${base()}/api/sessions/${sessionId}/messages/stream`,
+    `${getApiBase()}/api/sessions/${sessionId}/messages`,
     {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -63,8 +43,8 @@ export async function sendMessageStream(
     },
   );
   if (!res.ok) {
-    const err = await res.json().catch(() => ({ message: res.statusText }));
-    callbacks.onError(err.message ?? 'Failed to send message');
+    const message = await getApiError(res);
+    callbacks.onError(message || 'Failed to send message');
     return;
   }
   const reader = res.body?.getReader();
@@ -113,7 +93,7 @@ export async function sendMessageStream(
 }
 
 export async function endSession(sessionId: string): Promise<Evaluation> {
-  const res = await fetch(`${base()}/api/sessions/${sessionId}/end`, {
+  const res = await fetch(`${getApiBase()}/api/sessions/${sessionId}/end`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
   });

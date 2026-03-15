@@ -12,33 +12,17 @@ import { useCreateScenario } from '@/hooks/useScenario';
 import { useCreateSession } from '@/hooks/useSession';
 import { useToast } from '@/contexts/ToastContext';
 import { useSessionContext } from '@/contexts/SessionContext';
-import type { Persona, ScenarioContext, RubricCompetency } from '@/lib/types';
+import type {
+  Persona,
+  RubricCompetency,
+  ScenarioContext,
+} from '@/lib/types';
+import {
+  STEPS,
+  defaultPersona,
+  defaultContext,
+} from '@/lib/constants/scenario';
 import { SPIN_RUBRIC } from '@/lib/spin-rubric';
-import { CONTEXT_PRESETS } from '@/lib/context-presets';
-
-const STEPS = [
-  { id: 1, title: 'Persona', short: 'Persona' },
-  { id: 2, title: 'Context', short: 'Context' },
-  { id: 3, title: 'Rubric', short: 'Rubric' },
-] as const;
-
-const defaultPersona: Persona = {
-  name: 'Jordan Chen',
-  title: 'VP of Operations',
-  company: 'Northgate Logistics',
-  personality:
-    'Data-driven, time-pressed. Prefers concise answers and ROI. Skeptical of hype; wants proof and references.',
-};
-
-const defaultContext: ScenarioContext = CONTEXT_PRESETS.find(
-  (p) => p.id === 'real-estate',
-)?.context ?? {
-  product: 'Commercial property — office space',
-  dealDetails:
-    'Looking for 3–5 year lease. Need move-in within 6 months. Budget approved for target area.',
-  specialConditions:
-    'Prefers flexible exit clause. Wants build-out allowance. Must have parking.',
-};
 
 export default function ScenarioNewPage() {
   const router = useRouter();

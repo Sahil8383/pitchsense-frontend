@@ -2,6 +2,7 @@
 
 import { motion } from 'framer-motion';
 import { type RubricCompetency } from '@/lib/types';
+import { generateId } from '@/lib/utils';
 import { Card, CardHeader } from '@/components/ui/Card';
 import { Input } from '@/components/ui/Input';
 import { Textarea } from '@/components/ui/Textarea';
@@ -10,10 +11,6 @@ import { Button } from '@/components/ui/Button';
 const MIN_COMPETENCIES = 3;
 const MAX_COMPETENCIES = 4;
 const TOTAL_WEIGHT = 100;
-
-function generateId() {
-  return `comp-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
-}
 
 export interface RubricBuilderProps {
   competencies: RubricCompetency[];

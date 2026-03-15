@@ -1,11 +1,11 @@
+import type { MessageSegment } from '@/lib/types';
+
+export type { MessageSegment };
+
 /**
  * Parses message content into text and action segments.
  * Actions are asterisk-wrapped phrases like *hangs up* (common in roleplay).
  */
-export type MessageSegment =
-  | { type: 'text'; content: string }
-  | { type: 'action'; content: string };
-
 export function parseMessageContent(content: string): MessageSegment[] {
   if (!content.trim()) return [{ type: 'text', content }];
 

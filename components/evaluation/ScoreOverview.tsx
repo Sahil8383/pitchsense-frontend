@@ -1,20 +1,10 @@
 'use client';
 
+import { getScoreLabel, getScoreVariant } from '@/lib/utils';
+
 export interface ScoreOverviewProps {
   overallScore: number;
   variant?: 'default' | 'compact';
-}
-
-function getScoreLabel(score: number): string {
-  if (score < 60) return 'Needs work';
-  if (score < 80) return 'Good';
-  return 'Excellent';
-}
-
-function getScoreVariant(score: number): 'destructive' | 'warning' | 'success' {
-  if (score < 60) return 'destructive';
-  if (score < 80) return 'warning';
-  return 'success';
 }
 
 const GAUGE_DEFAULT = { size: 140, stroke: 10 };

@@ -1,28 +1,26 @@
 import type { Scenario, CreateScenarioInput } from '@/lib/types';
-import { getApiBase } from './config';
-
-const base = () => getApiBase();
+import { getApiBase, getApiError } from './config';
 
 export async function createScenario(
   input: CreateScenarioInput,
 ): Promise<Scenario> {
-  const res = await fetch(`${base()}/api/scenarios`, {
+  const res = await fetch(`${getApiBase()}/api/scenarios`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(input),
   });
   if (!res.ok) {
-    const err = await res.json().catch(() => ({ message: res.statusText }));
-    throw new Error(err.message ?? 'Failed to create scenario');
+    const message = await getApiError(res);
+    throw new Error(message || 'Failed to create scenario');
   }
   return res.json();
 }
 
 export async function getScenario(id: string): Promise<Scenario> {
-  const res = await fetch(`${base()}/api/scenarios/${id}`);
+  const res = await fetch(`${getApiBase()}/api/scenarios/${id}`);
   if (!res.ok) {
-    const err = await res.json().catch(() => ({ message: res.statusText }));
-    throw new Error(err.message ?? 'Failed to fetch scenario');
+    const message = await getApiError(res);
+    throw new Error(message || 'Failed to fetch scenario');
   }
   return res.json();
 }

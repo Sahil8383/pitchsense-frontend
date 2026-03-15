@@ -1,6 +1,6 @@
 'use client';
 
-import { useParams, useRouter } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import Link from 'next/link';
 import { ChatMessage } from '@/components/roleplay/ChatMessage';
@@ -12,38 +12,20 @@ import { EndSessionModal } from '@/components/roleplay/EndSessionModal';
 import { Button } from '@/components/ui/Button';
 import { useSessionContext } from '@/contexts/SessionContext';
 import { useEndSession } from '@/hooks/useSession';
+import { useSessionIdParam } from '@/hooks/useSessionIdParam';
 import { useToast } from '@/contexts/ToastContext';
 import { sendMessageStream } from '@/lib/api/sessions';
 import { normalizeAction } from '@/lib/chatUtils';
+import {
+  END_CALL_ACTIONS,
+  QUICK_PROMPTS,
+  STREAMING_BUYER_ID,
+  type SessionTab,
+} from '@/lib/constants/session';
 import type { Message } from '@/lib/types';
 
-type Tab = 'chat' | 'analytics';
-
-/** Buyer actions that mean the call/conversation ended; we can react in the UI. */
-const END_CALL_ACTIONS = new Set([
-  'hangs up',
-  'hang up',
-  'hangs up the phone',
-  'ends the call',
-  'end the call',
-  'leaves',
-  'leaves the call',
-  'disconnects',
-]);
-
-const QUICK_PROMPTS = [
-  "Hi, I'd like to introduce myself and our solution—do you have a few minutes?",
-  "What's the biggest challenge you're facing with your current setup?",
-  "I hear you on that—here's how we've helped other teams in your situation.",
-  'Would it make sense to schedule a short demo so you can see it in action?',
-];
-
-const STREAMING_BUYER_ID = 'streaming-buyer';
-
 export default function SessionPage() {
-  const params = useParams();
-  const sessionId =
-    typeof params.sessionId === 'string' ? params.sessionId : null;
+  const sessionId = useSessionIdParam();
   const router = useRouter();
   const { session: contextSession, setSession } = useSessionContext();
   const endSession = useEndSession();
@@ -70,7 +52,7 @@ export default function SessionPage() {
   }, [session?.messages, pendingMessages, isStreaming, streamingContent]);
 
   const [endModalOpen, setEndModalOpen] = useState(false);
-  const [narrowTab, setNarrowTab] = useState<Tab>('chat');
+  const [narrowTab, setNarrowTab] = useState<SessionTab>('chat');
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const isEndingDueToBuyerRef = useRef(false);
 

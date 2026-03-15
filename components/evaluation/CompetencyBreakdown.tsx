@@ -10,6 +10,7 @@ import {
   Cell,
 } from 'recharts';
 import type { CompetencyScore } from '@/lib/types';
+import { scoreToColor5 } from '@/lib/utils';
 import { Card, CardHeader } from '@/components/ui/Card';
 
 export interface CompetencyBreakdownProps {
@@ -19,12 +20,6 @@ export interface CompetencyBreakdownProps {
 }
 
 const MAX_SCORE = 5;
-
-function barColor(score: number) {
-  if (score >= 4) return 'var(--success)';
-  if (score >= 3) return 'var(--warning)';
-  return 'var(--destructive)';
-}
 
 export function CompetencyBreakdown({
   competencies,
@@ -71,7 +66,7 @@ export function CompetencyBreakdown({
               />
               <Bar dataKey="score" radius={[0, 4, 4, 0]}>
                 {chartData.map((_, i) => (
-                  <Cell key={i} fill={barColor(chartData[i].score)} />
+                  <Cell key={i} fill={scoreToColor5(chartData[i].score)} />
                 ))}
               </Bar>
             </BarChart>
@@ -100,7 +95,7 @@ export function CompetencyBreakdown({
                 className="h-full rounded-full"
                 style={{
                   width: `${(c.score / MAX_SCORE) * 100}%`,
-                  backgroundColor: barColor(c.score),
+                  backgroundColor: scoreToColor5(c.score),
                 }}
               />
             </div>
