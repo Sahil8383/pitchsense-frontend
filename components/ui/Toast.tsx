@@ -53,43 +53,22 @@ function ToastItem({
 
 export function ToastContainer() {
   const { toasts, removeToast } = useToastContext();
-  const loadingToasts = toasts.filter((t) => t.type === 'loading');
-  const otherToasts = toasts.filter((t) => t.type !== 'loading');
 
   return (
-    <>
-      {/* Loading toasts: top center */}
-      <div
-        className="fixed top-4 left-1/2 z-50 flex -translate-x-1/2 flex-col gap-2"
-        role="region"
-        aria-label="Loading notifications"
-      >
-        <AnimatePresence>
-          {loadingToasts.map((toast) => (
-            <ToastItem
-              key={toast.id}
-              toast={toast}
-              removeToast={removeToast}
-            />
-          ))}
-        </AnimatePresence>
-      </div>
-      {/* Other toasts: bottom right */}
-      <div
-        className="fixed bottom-4 right-4 z-50 flex flex-col gap-2"
-        role="region"
-        aria-label="Notifications"
-      >
-        <AnimatePresence>
-          {otherToasts.map((toast) => (
-            <ToastItem
-              key={toast.id}
-              toast={toast}
-              removeToast={removeToast}
-            />
-          ))}
-        </AnimatePresence>
-      </div>
-    </>
+    <div
+      className="fixed top-4 left-1/2 z-50 flex -translate-x-1/2 flex-col gap-2"
+      role="region"
+      aria-label="Notifications"
+    >
+      <AnimatePresence>
+        {toasts.map((toast) => (
+          <ToastItem
+            key={toast.id}
+            toast={toast}
+            removeToast={removeToast}
+          />
+        ))}
+      </AnimatePresence>
+    </div>
   );
 }

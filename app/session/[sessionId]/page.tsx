@@ -97,6 +97,10 @@ export default function SessionPage() {
   const handleSend = useCallback(
     async (content: string) => {
       if (!sessionId || !session) return;
+
+      // TEST: force API failure — send "/fail" to simulate send-message error
+      const simulateSendError = content.trim().toLowerCase() === '/fail';
+
       const sellerMessage: Message = {
         id: `temp-seller-${Date.now()}`,
         role: 'seller',
@@ -107,6 +111,17 @@ export default function SessionPage() {
       setIsStreaming(true);
       setStreamingContent('');
       scrollToBottom();
+
+      if (simulateSendError) {
+        await new Promise((r) => setTimeout(r, 800));
+        setIsStreaming(false);
+        setStreamingContent('');
+        setPendingMessages((prev) =>
+          prev.filter((m) => m.id !== sellerMessage.id),
+        );
+        addToast('error', 'Failed to send message. Please try again.');
+        return;
+      }
 
       await sendMessageStream(sessionId, content, {
         onDelta: (delta) => {
