@@ -63,7 +63,7 @@ export function Select({
         aria-expanded={open}
         aria-label={ariaLabel ?? label ?? 'Select option'}
         aria-labelledby={label && id ? `${id}-label` : undefined}
-        className="flex w-full cursor-pointer items-center justify-between gap-2 rounded-md border border-border bg-input px-3 py-2 text-left text-foreground transition-colors hover:border-muted-foreground/50 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:ring-offset-background disabled:cursor-not-allowed disabled:opacity-50"
+        className="flex w-full cursor-pointer items-center justify-between gap-2 rounded-md border border-border bg-input px-3 py-2 text-left text-foreground transition-colors hover:border-muted-foreground/50 focus:outline-none focus:ring-0 focus:ring-offset-0 disabled:cursor-not-allowed disabled:opacity-50"
         onClick={() => setOpen((o) => !o)}
         onKeyDown={(e) => {
           if (e.key === 'Escape') setOpen(false);

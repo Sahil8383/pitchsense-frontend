@@ -7,14 +7,18 @@ import { Textarea } from '@/components/ui/Textarea';
 import { Select } from '@/components/ui/Select';
 import { PERSONA_PRESETS } from '@/lib/persona-presets';
 
+const CUSTOM_VALUE = '__custom__';
+
 const presetOptions = [
-  { value: '', label: 'Choose a preset (optional)' },
   ...PERSONA_PRESETS.map((p) => ({ value: p.id, label: p.label })),
+  { value: CUSTOM_VALUE, label: 'Custom' },
 ];
 
 function selectedPresetId(personality: string): string {
+  if (!personality.trim()) return CUSTOM_VALUE;
   const preset = PERSONA_PRESETS.find((p) => p.personality === personality);
-  return preset?.id ?? '';
+  if (preset) return preset.id;
+  return CUSTOM_VALUE;
 }
 
 export interface PersonaFormProps {
@@ -24,7 +28,10 @@ export interface PersonaFormProps {
 
 export function PersonaForm({ value, onChange }: PersonaFormProps) {
   const handlePresetChange = (id: string) => {
-    if (!id) return;
+    if (id === CUSTOM_VALUE) {
+      onChange({ ...value, personality: '' });
+      return;
+    }
     const preset = PERSONA_PRESETS.find((p) => p.id === id);
     if (preset) {
       onChange({ ...value, personality: preset.personality });
@@ -57,7 +64,7 @@ export function PersonaForm({ value, onChange }: PersonaFormProps) {
         />
         <Select
           label="Personality archetype"
-          placeholder="Choose a preset (optional)"
+          placeholder="Custom"
           options={presetOptions}
           value={selectedPresetId(value.personality)}
           onChange={handlePresetChange}

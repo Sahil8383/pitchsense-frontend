@@ -30,13 +30,14 @@ const defaultPersona: Persona = {
     'Data-driven, time-pressed. Prefers concise answers and ROI. Skeptical of hype; wants proof and references.',
 };
 
-const defaultContext: ScenarioContext =
-  CONTEXT_PRESETS.find((p) => p.id === 'route-optimization')?.context ?? {
-    product: 'Route optimization software',
-    dealDetails:
-      'Evaluating options. Budget approved. Replacing current spreadsheets.',
-    specialConditions: undefined,
-  };
+const defaultContext: ScenarioContext = CONTEXT_PRESETS.find(
+  (p) => p.id === 'route-optimization',
+)?.context ?? {
+  product: 'Route optimization software',
+  dealDetails:
+    'Evaluating options. Budget approved. Replacing current spreadsheets.',
+  specialConditions: undefined,
+};
 
 export default function ScenarioNewPage() {
   const router = useRouter();
@@ -109,21 +110,25 @@ export default function ScenarioNewPage() {
         </div>
 
         {/* Step indicator */}
-        <div className="mb-8 flex items-center gap-2">
+        <div className="mb-8 flex items-center gap-0">
           {STEPS.map((s, i) => (
-            <div key={s.id} className="flex items-center gap-2">
+            <div key={s.id} className="flex items-center">
               <button
                 type="button"
                 onClick={() => setStep(s.id)}
-                className="flex cursor-pointer items-center gap-2 rounded-full border border-border bg-card px-3 py-1.5 text-sm font-medium text-foreground transition-colors hover:bg-muted/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+                className={`flex cursor-pointer items-center gap-2 rounded-full px-3 py-2 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background ${
+                  step === s.id
+                    ? 'border-2 border-foreground bg-foreground text-background shadow-sm hover:bg-foreground/90'
+                    : 'border-2 border-border bg-card text-muted-foreground hover:border-muted-foreground/50 hover:text-foreground hover:bg-muted/30'
+                }`}
                 aria-current={step === s.id ? 'step' : undefined}
                 aria-label={`Go to step ${s.id}: ${s.title}`}
               >
                 <span
-                  className={`flex h-6 w-6 items-center justify-center rounded-full text-xs ${
+                  className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-xs font-semibold ${
                     step === s.id
-                      ? 'bg-foreground text-background'
-                      : 'bg-muted text-muted-foreground'
+                      ? 'bg-background text-foreground'
+                      : 'border-2 border-current bg-transparent'
                   }`}
                 >
                   {s.id}
@@ -132,8 +137,10 @@ export default function ScenarioNewPage() {
               </button>
               {i < STEPS.length - 1 && (
                 <div
-                  className={`h-px w-4 sm:w-8 ${
-                    step > s.id ? 'bg-foreground/30' : 'bg-border'
+                  className={`mx-1 h-0.5 w-4 shrink-0 sm:mx-2 sm:w-8 ${
+                    step > s.id
+                      ? 'bg-foreground/50'
+                      : 'bg-muted-foreground/30'
                   }`}
                   aria-hidden
                 />
