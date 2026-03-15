@@ -1,5 +1,6 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import { useWebSocket } from '@/hooks/useWebSocket';
 import { Card, CardHeader } from '@/components/ui/Card';
 import { Badge } from '@/components/ui/Badge';
@@ -17,8 +18,18 @@ function FillerColorClass(total: number) {
 
 export function AnalyticsPanel({ sessionId, embedded }: AnalyticsPanelProps) {
   const { analytics, status } = useWebSocket(sessionId);
+  const [lastBuyerInterestPercent, setLastBuyerInterestPercent] = useState<
+    number | null
+  >(null);
 
   const a = analytics;
+
+  useEffect(() => {
+    if (typeof a?.buyerInterestPercent === 'number') {
+      setLastBuyerInterestPercent(a.buyerInterestPercent);
+    }
+  }, [a?.buyerInterestPercent]);
+
   const sellerWords = a?.talkRatio?.seller ?? 0;
   const buyerWords = a?.talkRatio?.buyer ?? 0;
   const totalWords = sellerWords + buyerWords;
@@ -81,41 +92,44 @@ export function AnalyticsPanel({ sessionId, embedded }: AnalyticsPanelProps) {
             </div>
           </div>
 
-          {typeof a.buyerInterestPercent === 'number' && (
-            <div>
-              <p className="text-xs font-medium text-muted-foreground mb-1">
-                Buyer interest
-              </p>
-              <p className="text-sm text-foreground mb-1.5">
-                {a.buyerInterestPercent}% —{' '}
-                {a.buyerInterestPercent < 34
-                  ? 'low'
-                  : a.buyerInterestPercent < 67
-                    ? 'moderate'
-                    : 'high'}{' '}
-                engagement
-              </p>
-              <div className="relative h-3 w-full">
-                {/* Red → orange → green gradient bar */}
-                <div
-                  className="absolute inset-0 rounded-full"
-                  style={{
-                    background:
-                      'linear-gradient(to right, #ef4444 0%, #f97316 50%, #22c55e 100%)',
-                  }}
-                />
-                {/* Profile-like circle indicator */}
-                <div
-                  className="absolute top-1/2 size-5 rounded-full border-2 border-white bg-slate-800 shadow-md transition-all duration-300 ease-out dark:border-slate-900 dark:bg-slate-100"
-                  style={{
-                    left: `clamp(0%, ${a.buyerInterestPercent}%, 100%)`,
-                    transform: 'translate(-50%, -50%)',
-                  }}
-                  aria-hidden
-                />
-              </div>
+          <div>
+            <p className="text-xs font-medium text-muted-foreground mb-1">
+              Buyer interest
+            </p>
+            <p className="text-sm text-foreground mb-1.5">
+              {(() => {
+                const pct =
+                  typeof a.buyerInterestPercent === 'number'
+                    ? a.buyerInterestPercent
+                    : lastBuyerInterestPercent;
+                if (pct === null) {
+                  return '— Waiting for response…';
+                }
+                const level =
+                  pct < 34 ? 'low' : pct < 67 ? 'moderate' : 'high';
+                return `${pct}% — ${level} engagement`;
+              })()}
+            </p>
+            <div className="relative h-3 w-full">
+              {/* Red → orange → green gradient bar */}
+              <div
+                className="absolute inset-0 rounded-full"
+                style={{
+                  background:
+                    'linear-gradient(to right, #ef4444 0%, #f97316 50%, #22c55e 100%)',
+                }}
+              />
+              {/* Profile-like circle indicator: use current or last known */}
+              <div
+                className="absolute top-1/2 size-5 rounded-full border-2 border-white bg-slate-800 shadow-md transition-all duration-300 ease-out dark:border-slate-900 dark:bg-slate-100"
+                style={{
+                  left: `clamp(0%, ${typeof a.buyerInterestPercent === 'number' ? a.buyerInterestPercent : lastBuyerInterestPercent ?? 0}%, 100%)`,
+                  transform: 'translate(-50%, -50%)',
+                }}
+                aria-hidden
+              />
             </div>
-          )}
+          </div>
 
           {a.monologueFlag && (
             <Badge variant="warning">

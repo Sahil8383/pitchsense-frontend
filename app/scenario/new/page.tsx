@@ -31,12 +31,13 @@ const defaultPersona: Persona = {
 };
 
 const defaultContext: ScenarioContext = CONTEXT_PRESETS.find(
-  (p) => p.id === 'route-optimization',
+  (p) => p.id === 'real-estate',
 )?.context ?? {
-  product: 'Route optimization software',
+  product: 'Commercial property — office space',
   dealDetails:
-    'Evaluating options. Budget approved. Replacing current spreadsheets.',
-  specialConditions: undefined,
+    'Looking for 3–5 year lease. Need move-in within 6 months. Budget approved for target area.',
+  specialConditions:
+    'Prefers flexible exit clause. Wants build-out allowance. Must have parking.',
 };
 
 export default function ScenarioNewPage() {
@@ -138,9 +139,7 @@ export default function ScenarioNewPage() {
               {i < STEPS.length - 1 && (
                 <div
                   className={`mx-1 h-0.5 w-4 shrink-0 sm:mx-2 sm:w-8 ${
-                    step > s.id
-                      ? 'bg-foreground/50'
-                      : 'bg-muted-foreground/30'
+                    step > s.id ? 'bg-foreground/50' : 'bg-muted-foreground/30'
                   }`}
                   aria-hidden
                 />
@@ -230,7 +229,7 @@ export default function ScenarioNewPage() {
                       Creating…
                     </>
                   ) : (
-                    'Create scenario & start practice'
+                    'Start practice'
                   )}
                 </Button>
               )}
