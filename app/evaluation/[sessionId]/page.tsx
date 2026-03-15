@@ -4,7 +4,6 @@ import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import { ScoreOverview } from '@/components/evaluation/ScoreOverview';
 import { CompetencyBreakdown } from '@/components/evaluation/CompetencyBreakdown';
-import { AnalyticsSummary } from '@/components/evaluation/AnalyticsSummary';
 import { TranscriptViewer } from '@/components/evaluation/TranscriptViewer';
 import { Spinner } from '@/components/ui/Spinner';
 import { useEvaluation } from '@/hooks/useEvaluation';
@@ -76,9 +75,15 @@ export default function EvaluationPage() {
         </div>
 
         <div className="flex flex-col gap-8">
-          <ScoreOverview overallScore={evaluation.overallScore} />
-          <CompetencyBreakdown competencies={evaluation.competencies} />
-          <AnalyticsSummary evaluation={evaluation} />
+          <CompetencyBreakdown
+            competencies={evaluation.competencies}
+            scoreSlot={
+              <ScoreOverview
+                overallScore={evaluation.overallScore}
+                variant="compact"
+              />
+            }
+          />
           <TranscriptViewer messages={messages} />
         </div>
 

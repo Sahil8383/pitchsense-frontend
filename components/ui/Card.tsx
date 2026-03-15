@@ -3,14 +3,21 @@ import type { HTMLAttributes } from 'react';
 export interface CardProps extends HTMLAttributes<HTMLDivElement> {
   children: React.ReactNode;
   className?: string;
+  variant?: 'default' | 'transparent';
 }
 
-export function Card({ children, className = '', ...props }: CardProps) {
+export function Card({
+  children,
+  className = '',
+  variant = 'default',
+  ...props
+}: CardProps) {
+  const base = 'rounded-lg text-card-foreground p-4 md:p-6';
+  const styles =
+    variant === 'transparent' ? base : `${base} border border-border bg-card`;
+
   return (
-    <div
-      className={`rounded-lg border border-border bg-card text-card-foreground p-4 md:p-6 ${className}`}
-      {...props}
-    >
+    <div className={`${styles} ${className}`} {...props}>
       {children}
     </div>
   );

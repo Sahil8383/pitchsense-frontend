@@ -14,6 +14,8 @@ import { Card, CardHeader } from '@/components/ui/Card';
 
 export interface CompetencyBreakdownProps {
   competencies: CompetencyScore[];
+  /** Renders in the same row as the bar chart (e.g. overall score) */
+  scoreSlot?: React.ReactNode;
 }
 
 const MAX_SCORE = 5;
@@ -26,6 +28,7 @@ function barColor(score: number) {
 
 export function CompetencyBreakdown({
   competencies,
+  scoreSlot,
 }: CompetencyBreakdownProps) {
   const chartData = competencies.map((c) => ({
     name: c.competencyName,
@@ -34,49 +37,53 @@ export function CompetencyBreakdown({
   }));
 
   return (
-    <Card>
+    <Card variant="transparent">
       <CardHeader>Per-competency breakdown</CardHeader>
 
-      <div className="mb-6 h-64 w-full md:h-72">
-        <ResponsiveContainer width="100%" height="100%">
-          <BarChart
-            data={chartData}
-            layout="vertical"
-            margin={{ top: 0, right: 24, left: 0, bottom: 0 }}
-          >
-            <XAxis type="number" domain={[0, MAX_SCORE]} tickCount={6} />
-            <YAxis
-              type="category"
-              dataKey="name"
-              width={120}
-              tick={{ fontSize: 12 }}
-            />
-            <Tooltip
-              formatter={(value: unknown) => [
-                `${Number(value) ?? 0} / ${MAX_SCORE}`,
-                'Score',
-              ]}
-            />
-            <Bar dataKey="score" radius={[0, 4, 4, 0]}>
-              {chartData.map((_, i) => (
-                <Cell key={i} fill={barColor(chartData[i].score)} />
-              ))}
-            </Bar>
-          </BarChart>
-        </ResponsiveContainer>
+      <div className="mb-6 flex md:flex-row flex-col flex-wrap items-stretch gap-6">
+        <div className="h-64 min-w-0 flex-1 md:h-72 md:min-w-[280px]">
+          <ResponsiveContainer width="100%" height="100%">
+            <BarChart
+              data={chartData}
+              layout="vertical"
+              margin={{ top: 0, right: 24, left: 0, bottom: 0 }}
+            >
+              <XAxis type="number" domain={[0, MAX_SCORE]} tickCount={6} />
+              <YAxis
+                type="category"
+                dataKey="name"
+                width={120}
+                tick={{ fontSize: 12 }}
+              />
+              <Tooltip
+                formatter={(value: unknown) => [
+                  `${Number(value) ?? 0} / ${MAX_SCORE}`,
+                  'Score',
+                ]}
+              />
+              <Bar dataKey="score" radius={[0, 4, 4, 0]}>
+                {chartData.map((_, i) => (
+                  <Cell key={i} fill={barColor(chartData[i].score)} />
+                ))}
+              </Bar>
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
+        {scoreSlot != null ? (
+          <div className="flex h-64 shrink-0 items-center justify-center md:h-full">
+            {scoreSlot}
+          </div>
+        ) : null}
       </div>
 
       <ul className="space-y-4">
         {competencies.map((c) => (
-          <li
-            key={c.competencyId}
-            className="rounded-lg border border-border bg-background/50 p-4"
-          >
-            <div className="flex flex-wrap items-center justify-between gap-2">
-              <span className="font-medium text-foreground">
+          <li key={c.competencyId} className="rounded-lg py-4">
+            <div className="flex flex-row items-center justify-between gap-4">
+              <span className="font-medium text-foreground min-w-0">
                 {c.competencyName}
               </span>
-              <span className="text-sm text-muted-foreground">
+              <span className="text-sm text-muted-foreground shrink-0">
                 Weight: {c.weight}% · Score: {c.score}/{MAX_SCORE}
               </span>
             </div>
